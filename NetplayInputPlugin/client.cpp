@@ -110,10 +110,10 @@ bool client::input_detected(const input_data& input, uint32_t mask) {
 }
 
 void client::load_public_server_list() {
-    public_servers["buffalo.play64.com|Buffalo (New York)"] = SERVER_STATUS_PENDING;
-    public_servers["dallas.play64.com|Dallas (Texas)"] = SERVER_STATUS_PENDING;
-    public_servers["seattle.play64.com|Seattle (Washington)"] = SERVER_STATUS_PENDING;
-    public_servers["amsterdam.play64.com|Amsterdam (Netherlands)"] = SERVER_STATUS_PENDING;
+    public_servers["50.20.251.212:26980|Buffalo (New York)"] = SERVER_STATUS_PENDING;
+    public_servers["216.225.150.202:27140|Dallas (Texas)"] = SERVER_STATUS_PENDING;
+    public_servers["74.217.200.24:27015|Seattle (Washington)"] = SERVER_STATUS_PENDING;
+    public_servers["192.135.116.52:26945|Amsterdam (Netherlands)"] = SERVER_STATUS_PENDING;
     my_dialog->update_server_list(public_servers);
     ping_public_server_list();
 }

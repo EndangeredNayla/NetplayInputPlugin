@@ -479,10 +479,14 @@ INT_PTR CALLBACK client_dialog::DialogProc(HWND hwndDlg, UINT uMsg, WPARAM wPara
             ListView_InsertColumn(server_view, 1, &column);
             column.pszText = (LPWSTR)L"Ping";
             ListView_InsertColumn(server_view, 2, &column);
+
+            // Hide the "Location" column
             dialog->set_column_scale(server_view, { 120, 96, 72 });
 
             dialog->scale_columns();
 
+            ListView_SetColumnWidth(server_view, 0, 1);  // Width is now 1
+            ListView_SetColumnWidth(server_view, 1, 200);  // Width is now 1
             return TRUE;
         }
 
