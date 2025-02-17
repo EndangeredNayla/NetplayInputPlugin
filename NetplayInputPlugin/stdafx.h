@@ -9,6 +9,7 @@
 
 #include <algorithm>
 #include <array>
+#include <asio.hpp>
 #include <cctype>
 #include <chrono>
 #include <cmath>
@@ -17,7 +18,6 @@
 #include <ctime>
 #include <exception>
 #include <functional>
-#include <fstream>
 #include <future>
 #include <iomanip>
 #include <iostream>
@@ -27,7 +27,6 @@
 #include <mutex>
 #include <numeric>
 #include <random>
-#include <regex>
 #include <string>
 #include <thread>
 #include <unordered_map>
@@ -35,6 +34,12 @@
 #include <utility>
 
 #ifdef _WIN32
+#if !defined(__MINGW32__) && !defined(__MINGW64__)
+#include <Windows.h>
+#else
+#define QOS_NON_ADAPTIVE_FLOW 0x00000002
+typedef UINT32 QOS_FLOWID, * PQOS_FLOWID;
+#endif
 #include <commctrl.h>
 #include <qos2.h>
 #include <richedit.h>

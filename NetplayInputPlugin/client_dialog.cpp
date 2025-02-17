@@ -79,6 +79,31 @@ void client_dialog::info(const string& text) {
     }), NULL);
 }
 
+void client_dialog::warn(const string& text) {
+    unique_lock<mutex> lock(mut);
+    if (destroyed) return;
+
+    PostMessage(hwndDlg, WM_TASK, (WPARAM) new function<void(void)>([=] {
+        HWND output_box = GetDlgItem(hwndDlg, IDC_OUTPUT_EDIT);
+        SendMessage(output_box, WM_SETREDRAW, FALSE, NULL);
+
+        bool at_bottom = scroll_at_bottom();
+
+        append_timestamp();
+
+        insert_text("[WARN] " + text);
+
+        if (at_bottom) {
+            scroll_to_bottom();
+        }
+
+        alert_user(false);
+
+        SendMessage(output_box, WM_SETREDRAW, TRUE, NULL);
+        RedrawWindow(output_box, NULL, NULL, RDW_ERASE | RDW_FRAME | RDW_INVALIDATE | RDW_ALLCHILDREN);
+        }), NULL);
+}
+
 void client_dialog::error(const string& text) {
     unique_lock<mutex> lock(mut);
     if (destroyed) return;
@@ -417,8 +442,8 @@ INT_PTR CALLBACK client_dialog::DialogProc(HWND hwndDlg, UINT uMsg, WPARAM wPara
             GetClientRect(hwndDlg, &dialog->initial_rect);
             dialog->set_window_scale(GetDlgItem(hwndDlg, IDC_OUTPUT_EDIT), { 0.0f, 0.6f, 1.0f, 1.0f });
             dialog->set_window_scale(GetDlgItem(hwndDlg, IDC_INPUT_EDIT), { 0.0f, 1.0f, 1.0f, 1.0f });
-            dialog->set_window_scale(GetDlgItem(hwndDlg, IDC_USER_LIST), { 0.0f, 0.0f, 0.6f, 0.6f });
-            dialog->set_window_scale(GetDlgItem(hwndDlg, IDC_SERVER_LIST), { 0.6f, 0.0f, 1.0f, 0.6f });
+            dialog->set_window_scale(GetDlgItem(hwndDlg, IDC_USER_LIST), { 0.0f, 0.0f, 0.5f, 0.6f });
+            dialog->set_window_scale(GetDlgItem(hwndDlg, IDC_SERVER_LIST), { 0.5f, 0.0f, 1.0f, 0.8f });
 
             LVCOLUMN column;
             ZeroMemory(&column, sizeof(column));

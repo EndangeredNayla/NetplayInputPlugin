@@ -14,6 +14,7 @@
 #include <cryptopp/hex.h>
 
 #include <Windows.h>
+#include <regex>
 
 using namespace std;
 using namespace asio;
@@ -109,54 +110,12 @@ bool client::input_detected(const input_data& input, uint32_t mask) {
 }
 
 void client::load_public_server_list() {
-    constexpr static char API_HOST[] = "api.play64.com";
-
-    service.post([&] {
-        ip::tcp::resolver tcp_resolver(service);
-        error_code error;
-        auto iterator = tcp_resolver.resolve(API_HOST, "80", error);
-        if (error) return my_dialog->error("Failed to load server list");
-        auto s = make_shared<ip::tcp::socket>(service);
-        s->async_connect(*iterator, [=](const error_code& error) {
-            if (error) return my_dialog->error("Failed to load server list");
-            shared_ptr<string> buf = make_shared<string>(
-                "GET /servers.txt HTTP/1.1\r\n"
-                "Host: " + string(API_HOST) + "\r\n"
-                "Connection: close\r\n\r\n");
-            async_write(*s, buffer(*buf), [=](const error_code& error, size_t transferred) {
-                if (error) {
-                    s->close();
-                    my_dialog->error("Failed to load server list");
-                } else {
-                    buf->resize(4096);
-                    async_read(*s, buffer(*buf), [=](const error_code& error, size_t transferred) {
-                        s->close();
-                        if (error != error::eof) return my_dialog->error("Failed to load server list");
-                        buf->resize(transferred);
-                        public_servers.clear();
-#ifdef DEBUG
-                        public_servers["localhost"] = SERVER_STATUS_PENDING;
-#endif
-                        bool content = false;
-                        for (size_t start = 0, end = 0; end != string::npos; start = end + 1) {
-                            end = buf->find('\n', start);
-                            string line = buf->substr(start, end == string::npos ? string::npos : end - start);
-                            if (!line.empty() && line.back() == '\r') {
-                                line.resize(line.length() - 1);
-                            }
-                            if (line.empty()) {
-                                content = true;
-                            } else if (content) {
-                                public_servers[line] = SERVER_STATUS_PENDING;
-                            }
-                        }
-                        my_dialog->update_server_list(public_servers);
-                        ping_public_server_list();
-                    });
-                }
-            });
-        });
-    });
+    public_servers["buffalo.play64.com|Buffalo (New York)"] = SERVER_STATUS_PENDING;
+    public_servers["dallas.play64.com|Dallas (Texas)"] = SERVER_STATUS_PENDING;
+    public_servers["seattle.play64.com|Seattle (Washington)"] = SERVER_STATUS_PENDING;
+    public_servers["amsterdam.play64.com|Amsterdam (Netherlands)"] = SERVER_STATUS_PENDING;
+    my_dialog->update_server_list(public_servers);
+    ping_public_server_list();
 }
 
 void client::ping_public_server_list() {
@@ -798,7 +757,7 @@ void client::update_save_info()
 {
     std::vector<string> save_files = find_rom_save_files(me->rom.name);
     if (save_files.size() == 0)
-        my_dialog->info("Save data is empty, you'll need to savesync with another player");
+        my_dialog->error("Save data is empty");
 
     std::sort(save_files.begin(), save_files.end());
 
@@ -812,10 +771,6 @@ void client::update_save_info()
         save_info.save_name = save_files.at(i);
         save_info.save_data = save_info.save_name.empty() ? "" : slurp2(save_path + save_info.save_name);
         save_info.sha1_data = save_info.save_name.empty() ? "" : sha1_save_info(save_info);
-
-        if (!save_info.save_name.empty())
-            my_dialog->info("Save Hash: " + save_info.sha1_data);
-
     }
 }
 
@@ -1193,6 +1148,24 @@ void client::send_name() {
 
 void client::send_message(const string& message) {
     send(packet() << MESSAGE << message);
+}
+
+void client::send_save_info() {
+    packet p;
+    p << SAVE_INFO;
+    for (auto& save : me->saves) {
+        p << save;
+    }
+    send(p);
+}
+
+void client::send_savesync() {
+    packet p;
+    p << SAVE_SYNC;
+    for (auto& save : me->saves) {
+        p << save;
+    }
+    send(p);
 }
 
 void client::send_controllers() {

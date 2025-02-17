@@ -357,6 +357,24 @@ void user::send_accept() {
     send(p);
 }
 
+void user::send_save_sync(const std::array<save_info, 5>& saves) {
+    packet p;
+    p << SAVE_SYNC;
+    for (auto& save : saves) {
+        p << save;
+    }
+    send(p);
+}
+
+void user::send_save_info(uint32_t id, const std::array<save_info, 5>& saves) {
+    packet p;
+    p << SAVE_INFO << id;
+    for (auto& save : saves) {
+        p << save;
+    }
+    send(p);
+}
+
 void user::send_join(const user_info& info) {
     send(packet() << JOIN << info);
 }
