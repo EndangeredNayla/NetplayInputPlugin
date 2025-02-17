@@ -15,7 +15,6 @@
 [Dd]ebugPublic/
 [Rr]elease/
 [Rr]eleases/
-vcpkg_installed/
 [Dd]ebug \([Ss]erver\)/
 [Dd]ebugPublic \([Ss]erver\)/
 [Rr]elease \([Ss]erver\)/
