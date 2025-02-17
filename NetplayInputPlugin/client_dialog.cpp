@@ -486,7 +486,7 @@ INT_PTR CALLBACK client_dialog::DialogProc(HWND hwndDlg, UINT uMsg, WPARAM wPara
             dialog->scale_columns();
 
             ListView_SetColumnWidth(server_view, 0, 1);  // Width is now 1
-            ListView_SetColumnWidth(server_view, 1, 200);  // Width is now 1
+            ListView_SetColumnWidth(server_view, 1, 210);  // Width is now 1
             return TRUE;
         }
 
